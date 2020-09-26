@@ -1,0 +1,1 @@
+grant select,insert,update,alter,create,references on gts.* to fleet@localhost;
