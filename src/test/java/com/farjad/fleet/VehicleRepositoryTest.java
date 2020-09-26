@@ -1,6 +1,7 @@
 package com.farjad.fleet;
 
 import com.farjad.fleet.dao.VehicleRepository;
+import com.farjad.fleet.model.Account;
 import com.farjad.fleet.model.Device;
 import com.farjad.fleet.model.Vehicle;
 import org.junit.jupiter.api.Test;
@@ -20,9 +21,15 @@ public class VehicleRepositoryTest {
         while (iterator.hasNext ()) {
             Vehicle vehicle = iterator.next ();
             Device device = vehicle.getDevice ();
+            Account account = vehicle.getAccount ();
             System.out.println ("deviceId = " + device.getDeviceId () +
-                    "  imei-->" + device.getUniqueID ());
+                    "  imei-->" + device.getUniqueID ()+" accountID="+
+                    account.getAccountID ());
 
         }
+    }
+    @Test void testFindByAccount(){
+        Iterator<Vehicle> iterator = vehicleRepository.findByAccount (
+                "pakanfard2").iterator ();
     }
 }
