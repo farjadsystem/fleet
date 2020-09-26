@@ -2,6 +2,7 @@ package com.farjad.fleet.services;
 
 import com.farjad.fleet.dao.VehicleRepository;
 import com.farjad.fleet.model.Vehicle;
+import com.farjad.fleet.util.TextUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -23,12 +25,13 @@ public class FleetExport {
     @Autowired
     MessageSource messageSource;
 
-    public ByteArrayInputStream vehicleListToExcelFile(Locale locale) {
+    public ByteArrayInputStream vehicleListToExcelFile(String accountID ,
+                                                       Locale locale) {
         try {
             XSSFWorkbook workbook = new XSSFWorkbook ();
-            addVehiclesSheet (workbook , locale);
+            addVehiclesSheet (accountID , workbook , locale);
             addGPSInfoSheet (workbook , locale);
-            addDriversSheet (workbook,locale);
+            addDriversSheet (workbook , locale);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream ();
             workbook.write (outputStream);
             return new ByteArrayInputStream (outputStream.toByteArray ());
@@ -38,9 +41,8 @@ public class FleetExport {
         }
     }
 
-    private void addVehiclesSheet(XSSFWorkbook workbook , Locale locale) {
+    private void addVehiclesSheet(String accountID , XSSFWorkbook workbook , Locale locale) {
 
-        Iterable<Vehicle> vehicles = vehicleRepository.findAll ();
         Sheet sheet = workbook.createSheet (
                 messageSource.getMessage (
                         "pasmand.excel.auto_info" , null , locale));
@@ -50,14 +52,86 @@ public class FleetExport {
             sheet.setRightToLeft (true);
         }
         addVehiclesSheetHeaders (workbook , sheet , locale);
-
+        List<Vehicle> vehicles =
+                vehicleRepository.findByAccount (accountID);
+        System.out.println ("there "+vehicles.size ()+" vehicles on the list");
         // Creating data rows for each customer
-        vehicles.forEach (vehicle -> {
-                    Row dataRow = sheet.createRow (sheet.getLastRowNum () + 1);
-                    dataRow.createCell (0).setCellValue (
-                            vehicle.getDevice ().getUniqueID ());
-                }
-        );
+        int i = 2, j = 0;
+
+        for (Vehicle vehicle:
+             vehicles) {
+
+            System.out.println ("adding "+(i+1)+"th rowsd");
+            Row dataRow = sheet.createRow (i++);
+            //radif
+            dataRow.createCell (j++).setCellValue (
+                    i-1);
+            //vin
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getVin ());
+            //job
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getJob ());
+            //vehicle_name
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getVehicleName ());
+            //vehicle_type
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getVehicleType ());
+            //man_year
+            dataRow.createCell (j++).setCellValue (
+                    TextUtil.nullToStr (vehicle.getManYear ()));
+            //plaque_4
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getPlaqueP4 ());
+            //plaque_3
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getPlaqueP3 ());
+            //plaque_2
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getPlaqueP2 ());
+            ////plaque_1
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getPlaqueP1 ());
+
+            // owner_name
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getOwnerName ());
+            //imei
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getDevice ().getUniqueID ());
+            //vehicle_health_cert
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getVehicleHealthCert ());
+            //body_no
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getVehicleBodyNo ());
+            //system_type
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getVehicleSystemType ());
+            //chassis_no
+            dataRow.createCell (j++).setCellValue (
+                    TextUtil.nullToStr (vehicle.getChassisNo ()));
+            //fuel_type
+            dataRow.createCell (j++).setCellValue (
+                    vehicle.getFuelType ());
+            //fuel_rate
+            dataRow.createCell (j++).setCellValue (
+                    TextUtil.nullToStr (vehicle.getFuelRate ()));
+            //fuel_tank_cap
+            dataRow.createCell (j++).setCellValue (
+                    TextUtil.nullToStr (vehicle.getFuelTankCap ()));
+            //num_cylindar
+            dataRow.createCell (j++).setCellValue (
+                    TextUtil.nullToStr (vehicle.getNumCylinders ()));
+            //num_axles
+            dataRow.createCell (j++).setCellValue (
+                    TextUtil.nullToStr (vehicle.getNumAxles ()));
+            //num_wheels
+            dataRow.createCell (j++).setCellValue (
+                    TextUtil.nullToStr (vehicle.getNumWheels ()));
+            
+        }
 
 
     }
@@ -183,7 +257,8 @@ public class FleetExport {
         headerCellStyle.setReadingOrder (ReadingOrder.RIGHT_TO_LEFT);
         return headerCellStyle;
     }
-    private void addDriversSheet(XSSFWorkbook workbook , Locale locale){
+
+    private void addDriversSheet(XSSFWorkbook workbook , Locale locale) {
         Sheet sheet = workbook.createSheet (
                 messageSource.getMessage (
                         "pasmand.excel.driver_info" , null , locale));
@@ -194,6 +269,7 @@ public class FleetExport {
         }
         addDriversSheetHeaders (workbook , sheet , locale);
     }
+
     private void addDriversSheetHeaders(XSSFWorkbook workbook , Sheet sheet ,
                                         Locale locale) {
         String driversSheetHeaderNames[] = {
