@@ -8,6 +8,8 @@ import java.util.Date;
 @Entity
 @Table(name="vehicle",uniqueConstraints={@UniqueConstraint(columnNames="imei")
         ,@UniqueConstraint(columnNames="vehicle_VIN")})
+
+
 public @Data
 class Vehicle {
     @Id
@@ -15,9 +17,12 @@ class Vehicle {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne(cascade = CascadeType.DETACH)
-    @JoinColumn(name = "imei", referencedColumnName = "uniqueID")
-    Device device;
+    @OneToOne(cascade = CascadeType.DETACH,fetch = FetchType.LAZY)
+    @JoinColumn(name = "imei", referencedColumnName = "uniqueID",nullable = true)
+    private Device device;
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name="accountID")
+    private Account account;
     @Column(name="vehicle_VIN")
     private String vin;
     @Column(name="info_type")
@@ -28,8 +33,10 @@ class Vehicle {
     private String area;
     @Column(name="job_category")
     private String jobCategory;
+/*
     @Column(name="accountID")
     private String accountID;
+*/
     @Column(name="vehicle_type")
     private String vehicleType;
     @Column
@@ -44,8 +51,8 @@ class Vehicle {
     private String plaqueP4;
     @Column(name="vehicle_body_no")
     private String vehicleBodyNo;
-    @Column(name="man_year")
-    private Integer man_year;
+    @Column(name="man_year",nullable = true)
+    private Integer manYear;
     @Column(name="driver_name")
     private String driverName;
     @Column(name="driver_phone")
@@ -60,8 +67,8 @@ class Vehicle {
     private String driverIdNo;
     @Column(name="`fuel_type`")
     private String fuelType;
-    @Column(name="`fuel_rate`")
-    private Integer fuelRate;
+    @Column(name="fuel_rate")
+    private Double fuelRate;
     @Column(name="fuel_tank_cap")
     private Integer fuelTankCap;
     @Column(name="num_wheels")

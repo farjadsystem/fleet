@@ -5,6 +5,7 @@ import lombok.Data;
 import javax.persistence.*;
 
 @Entity
+@Table(name="selection_values")
 public @Data
 class SelectionValue {
     @Id
